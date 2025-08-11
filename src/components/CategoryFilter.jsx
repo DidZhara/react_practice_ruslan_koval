@@ -8,7 +8,7 @@ export const CategoryFilter = ({
     <a
       href="#/"
       data-cy="AllCategories"
-      className={`button mr-6 ${selectedCategories.length === 0 ? 'is-outlined is-success' : 'is-succes'}`}
+      className={`button mr-6 is-success ${selectedCategories.length === 0 ? 'is-outlined' : ''}`}
       onClick={event => {
         event.preventDefault();
         onClearCategories();
@@ -20,7 +20,7 @@ export const CategoryFilter = ({
     {categories.map(({ id, title }) => (
       <a
         data-cy="Category"
-        className={`button mr-6 ${selectedCategories.length === 0 ? 'is-success is-outlined' : 'is-success'}`}
+        className={`button mr-2 my-1 ${selectedCategories.includes(id) ? 'is-info' : ''}`}
         href="#/"
         onClick={event => {
           event.preventDefault();
