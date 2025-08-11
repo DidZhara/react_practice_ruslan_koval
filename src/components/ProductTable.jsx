@@ -17,7 +17,7 @@ export function ProductTable({ products }) {
   }
 
   return (
-    <div className="box table-container">
+    <div className="box table-container" data-cy="ProductTable">
       <table className="table is-striped is-narrow is fullwidth">
         <thead>
           <tr>
@@ -29,13 +29,20 @@ export function ProductTable({ products }) {
         </thead>
         <tbody>
           {products.map(product => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
-              <td>{product.name}</td>
-              <td>
+            <tr key={product.id} data-cy="Product">
+              <td data-cy="ProductId">{product.id}</td>
+              <td data-cy="ProductName">{product.name}</td>
+              <td data-cy="ProductCategory">
                 {product.category.icon} - {product.category.title}
               </td>
-              <td>{product.user.name}</td>
+              <td
+                data-cy="ProductUser"
+                className={
+                  product.user.sex === 'm' ? 'has-text-link' : 'has-text-danger'
+                }
+              >
+                {product.user.name}
+              </td>
             </tr>
           ))}
         </tbody>

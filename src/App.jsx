@@ -7,6 +7,8 @@ import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
 import { ProductTable } from './components/ProductTable';
 import { UserFilter } from './components/UserFilter';
+import { ResetButton } from './components/ResetButton';
+import { CategoryFilter } from './components/CategoryFilter';
 
 // const products = productsFromServer.map((product) => {
 //   const category = null; // find by product.categoryId
@@ -18,6 +20,17 @@ import { UserFilter } from './components/UserFilter';
 export const App = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const toggleCategory = id => {
+    setSelectedCategories(
+      prev =>
+        prev.includes(id) ? prev.filter(cId => cId !== id) : [...prev, id],
+      // eslint-disable-next-line function-paren-newline
+    );
+  };
+
+  const clearCategories = () => setSelectedCategories([]);
 
   const products = productsFromServer.map(product => {
     const category = categoriesFromServer.find(
@@ -28,13 +41,16 @@ export const App = () => {
     return { ...product, category, user };
   });
 
-  const visibleProducts = products.filter(({ user, name }) => {
+  const visibleProducts = products.filter(({ user, name, category }) => {
     const matchesUser = selectedUserId === null || user.id === selectedUserId;
     const matchesSearch = name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(category.id);
 
-    return matchesSearch && matchesUser;
+    return matchesSearch && matchesUser && matchesCategory;
   });
 
   return (
@@ -81,48 +97,20 @@ export const App = () => {
               </p>
             </div>
 
-            <div className="panel-block is-flex-wrap-wrap">
-              <a
-                href="#/"
-                data-cy="AllCategories"
-                className="button is-success mr-6 is-outlined"
-              >
-                All
-              </a>
+            <CategoryFilter
+              categories={categoriesFromServer}
+              selectedCategories={selectedCategories}
+              onTogleCategory={toggleCategory}
+              onClearCategories={clearCategories}
+            />
 
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 1
-              </a>
-
-              <a data-cy="Category" className="button mr-2 my-1" href="#/">
-                Category 2
-              </a>
-
-              <a
-                data-cy="Category"
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Category 3
-              </a>
-              <a data-cy="Category" className="button mr-2 my-1" href="#/">
-                Category 4
-              </a>
-            </div>
-
-            <div className="panel-block">
-              <a
-                data-cy="ResetAllButton"
-                href="#/"
-                className="button is-link is-outlined is-fullwidth"
-              >
-                Reset all filters
-              </a>
-            </div>
+            <ResetButton
+              onReset={() => {
+                setSelectedUserId(null);
+                setSearchQuery('');
+                setSelectedCategories([]);
+              }}
+            />
           </nav>
         </div>
 
