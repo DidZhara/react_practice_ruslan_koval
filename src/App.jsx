@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 
 import usersFromServer from './api/users';
@@ -14,64 +14,81 @@ import productsFromServer from './api/products';
 // });
 
 export const App = () => {
-  const products = productsFromServer.map(product => {
-    const category = categoriesFromServer.find(c => c.id === product.id);
-    const users = usersFromServer.find(u => u.id === category.id);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-    return {...product, category, user};
+  const products = productsFromServer.map(product => {
+    const category = categoriesFromServer.find(
+      c => c.id === product.categoryId,
+    );
+    const user = usersFromServer.find(u => u.id === category.ownerId);
+
+    return { ...product, category, user };
+  });
+
+  const visibleProducts = products.filter(({ user, name }) => {
+    const matchesUser = selectedUserId === null || user.id === selectedUserId;
+    const matchesSearch = name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    return matchesSearch && matchesUser;
   });
 
   return (
     <div className="section">
-    <div className="container">
-      <h1 className="title">Product Categories</h1>
+      <div className="container">
+        <h1 className="title">Product Categories</h1>
 
-      <div className="block">
-        <nav className="panel">
-          <p className="panel-heading">Filters</p>
+        <div className="block">
+          <nav className="panel">
+            <p className="panel-heading">Filters</p>
 
-          <p className="panel-tabs has-text-weight-bold">
-            <a data-cy="FilterAllUsers" href="#/">
-              All
-            </a>
-
-            <a data-cy="FilterUser" href="#/">
-              User 1
-            </a>
-
-            <a data-cy="FilterUser" href="#/" className="is-active">
-              User 2
-            </a>
-
-            <a data-cy="FilterUser" href="#/">
-              User 3
-            </a>
-          </p>
-
-          <div className="panel-block">
-            <p className="control has-icons-left has-icons-right">
-              <input
-                data-cy="SearchField"
-                type="text"
-                className="input"
-                placeholder="Search"
-                value="qwe"
-              />
-
-              <span className="icon is-left">
-                <i className="fas fa-search" aria-hidden="true" />
-              </span>
-
-              <span className="icon is-right">
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <button
-                  data-cy="ClearButton"
-                  type="button"
-                  className="delete"
-                />
-              </span>
+            <p className="panel-tabs has-text-weight-bold">
+              <a data-cy="FilterAllUsers" href="#/">
+                All
+              </a>
+              {usersFromServer.map(({ id, name }) => (
+                <a
+                  key={id}
+                  data-cy="FilterUser"
+                  href="#/"
+                  className={selectedUserId === id ? 'is-active' : ''}
+                  onClick={() => setSelectedUserId(id)}
+                >
+                  {name}
+                </a>
+              ))}
             </p>
-          </div>
+
+            <div className="panel-block">
+              <p className="control has-icons-left has-icons-right">
+                <input
+                  data-cy="SearchField"
+                  type="text"
+                  className="input"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={event => setSearchQuery(event.target.value)}
+                />
+
+                <span className="icon is-left">
+                  <i className="fas fa-search" aria-hidden="true" />
+                </span>
+
+                {searchQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchQuery('')}
+                    />
+                  </span>
+                )}
+              </p>
+            </div>
 
           <div className="panel-block is-flex-wrap-wrap">
             <a
